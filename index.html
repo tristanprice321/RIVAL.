@@ -1,0 +1,531 @@
+
+
+<!DOCTYPE html>
+
+<html lang="en">
+
+<head>
+
+<meta charset="UTF-8">
+
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<meta name="theme-color" content="#101410">
+
+<title>RIVAL — Own the game</title>
+
+<style>
+
+*{box-sizing:border-box}
+
+body{margin:0;background:#101410;color:#fff;font-family:system-ui,sans-serif;padding-bottom:90px}
+
+main{max-width:600px;margin:auto;padding:20px}
+
+header{display:flex;justify-content:space-between;align-items:center}
+
+.logo{font-size:36px;font-weight:1000;font-style:italic;color:#c5ff43;letter-spacing:-2px}
+
+small{color:#a1aa9f}
+
+h2{margin-top:26px}
+
+.card{background:#202720;border:1px solid #303a30;border-radius:18px;padding:18px;margin:12px 0}
+
+.stats{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+
+.number{font-size:32px;font-weight:900;color:#c5ff43}
+
+button,input,select,textarea{font:inherit;border-radius:12px;padding:14px}
+
+button{cursor:pointer;border:0;background:#c5ff43;color:#101410;font-weight:800}
+
+.primary{width:100%;margin:12px 0}
+
+input,select,textarea{width:100%;background:#141a14;color:white;border:1px solid #414b41;margin:8px 0}
+
+nav{position:fixed;bottom:0;left:0;right:0;background:#191f19;display:flex;justify-content:space-around;padding:12px 4px calc(12px + env(safe-area-inset-bottom));border-top:1px solid #303a30}
+
+nav button{background:transparent;color:#b6c0b4;font-size:12px;padding:8px}
+
+nav button.active{color:#c5ff43}
+
+nav span{display:block;font-size:23px}
+
+.page{display:none}
+
+.page.active{display:block}
+
+.score{font-size:30px;font-weight:900;text-align:center;margin:15px 0}
+
+.win{color:#c5ff43}
+
+.loss{color:#ff8585}
+
+.muted{color:#a1aa9f}
+
+.sports{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+
+.sports button{background:#202720;color:white;padding:22px 8px;border:1px solid #303a30}
+
+.tag{font-size:11px;color:#c5ff43;letter-spacing:2px;font-weight:800}
+
+.secondary{background:#303a30;color:white}
+
+label{font-size:13px;color:#c2c9c0}
+
+</style>
+
+</head>
+
+<body>
+
+<main>
+
+<header>
+
+<div class="logo">RIVAL.</div>
+
+<small>OWN THE GAME.</small>
+
+</header>
+
+<section id="feed" class="page active">
+
+<h1>Game on.</h1>
+
+<div class="stats">
+
+<div class="card"><small>Victories</small><div class="number" id="wins">0</div></div>
+
+<div class="card"><small>Win rate</small><div class="number" id="rate">0%</div></div>
+
+</div>
+
+<button class="primary" onclick="show('play')">＋ Record a match</button>
+
+<h2>Recent activity</h2>
+
+<div id="activity"></div>
+
+</section>
+
+<section id="play" class="page">
+
+<h1>Record a match</h1>
+
+<form id="matchForm">
+
+<label>Sport</label>
+
+<select id="sport">
+
+<option>🎱 Pool</option>
+
+<option>🎯 Darts</option>
+
+<option>🏀 Basketball</option>
+
+<option>🏓 Table tennis</option>
+
+<option>🎾 Tennis</option>
+
+<option>⚽ Football</option>
+
+<option>🏸 Badminton</option>
+
+<option>🎮 Gaming</option>
+
+<option>Other</option>
+
+</select>
+
+<label>Opponent</label>
+
+<input id="opponent" placeholder="Friend's name" required maxlength="40">
+
+<label>Result</label>
+
+<select id="result">
+
+<option>Won</option>
+
+<option>Lost</option>
+
+<option>Draw</option>
+
+</select>
+
+<label>Score (optional)</label>
+
+<div class="stats">
+
+<input id="myScore" type="number" min="0" placeholder="You">
+
+<input id="theirScore" type="number" min="0" placeholder="Opponent">
+
+</div>
+
+<label>Match type</label>
+
+<select id="mode">
+
+<option>Casual</option>
+
+<option>Ranked — unverified</option>
+
+</select>
+
+<label>Visibility</label>
+
+<select id="visibility">
+
+<option>Friends</option>
+
+<option>Private</option>
+
+</select>
+
+<label>Notes (optional)</label>
+
+<textarea id="notes" placeholder="Anything worth mentioning?"></textarea>
+
+<button class="primary" type="submit">Save result</button>
+
+</form>
+
+</section>
+
+<section id="sports" class="page">
+
+<h1>Explore sports</h1>
+
+<div class="sports" id="sportButtons"></div>
+
+<div id="sportHub"></div>
+
+</section>
+
+<section id="ranks" class="page">
+
+<h1>Rankings</h1>
+
+<small>Local match statistics. Verified online ratings coming later.</small>
+
+<div id="rankList"></div>
+
+</section>
+
+<section id="profile" class="page">
+
+<h1>Your profile</h1>
+
+<div class="card">
+
+<label>Display name</label>
+
+<input id="username" placeholder="Your name">
+
+<button class="primary" onclick="saveProfile()">Save profile</button>
+
+</div>
+
+<h2>Gear locker</h2>
+
+<div class="card">
+
+<input id="gearName" placeholder="Your equipment">
+
+<button class="primary" onclick="addGear()">Add equipment</button>
+
+<div id="gearList"></div>
+
+</div>
+
+<h2>Match history</h2>
+
+<div id="history"></div>
+
+</section>
+
+</main>
+
+<nav>
+
+<button onclick="show('feed')"><span>⌂</span>Feed</button>
+
+<button onclick="show('sports')"><span>◎</span>Sports</button>
+
+<button onclick="show('play')"><span>⊕</span>Play</button>
+
+<button onclick="show('ranks')"><span>🏆</span>Ranks</button>
+
+<button onclick="show('profile')"><span>◉</span>Profile</button>
+
+</nav>
+
+<script>
+
+const $=id=>document.getElementById(id);
+
+function read(key,fallback){
+
+try{return JSON.parse(localStorage.getItem(key))??fallback}
+
+catch{return fallback}
+
+}
+
+let matches=read('rivalMatches',[]);
+
+let gear=read('rivalGear',[]);
+
+let name=read('rivalName','');
+
+const sports=[...$('sport').options].map(o=>o.value);
+
+function safe(v){
+
+return String(v??'').replace(/[&<>"']/g,c=>({
+
+'&':'&amp;','<':'&lt;','>':'&gt;',
+
+'"':'&quot;',"'":'&#39;'
+
+}[c]));
+
+}
+
+function save(){
+
+localStorage.setItem('rivalMatches',JSON.stringify(matches));
+
+}
+
+function show(page){
+
+document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+
+$(page).classList.add('active');
+
+document.querySelectorAll('nav button').forEach(b=>{
+
+b.classList.toggle('active',b.getAttribute('onclick')===`show('${page}')`);
+
+});
+
+render();
+
+window.scrollTo(0,0);
+
+}
+
+function card(m){
+
+let score=m.a!==''&&m.b!==''?`${safe(m.a)} : ${safe(m.b)}`:safe(m.result);
+
+return `<div class="card">
+
+<small>${safe(m.sport)} · ${safe(m.date)}</small>
+
+<div class="score ${m.result==='Won'?'win':m.result==='Lost'?'loss':''}">${score}</div>
+
+<strong>${safe(name||'You')} vs ${safe(m.opponent)}</strong>
+
+<p class="muted">${safe(m.result)} · ${safe(m.mode)}</p>
+
+${m.notes?`<p>${safe(m.notes)}</p>`:''}
+
+${m.visibility==='Private'?'<small>Private match</small>':
+
+`<button class="secondary" onclick="shareMatch('${m.id}')">Share result</button>`}
+
+</div>`;
+
+}
+
+function render(){
+
+let wins=matches.filter(m=>m.result==='Won').length;
+
+$('wins').textContent=wins;
+
+$('rate').textContent=matches.length?Math.round(wins/matches.length*100)+'%':'0%';
+
+$('activity').innerHTML=matches.filter(m=>m.visibility!=='Private').map(card).join('')||'<div class="card">Your rivalry starts here. Record your first match!</div>';
+
+$('history').innerHTML=matches.map(card).join('')||'<p class="muted">No matches yet.</p>';
+
+$('username').value=name;
+
+$('gearList').innerHTML=gear.map(g=>`<p>✓ ${safe(g)}</p>`).join('');
+
+$('rankList').innerHTML=sports.map(s=>{
+
+let games=matches.filter(m=>m.sport===s);
+
+if(!games.length)return '';
+
+let w=games.filter(m=>m.result==='Won').length;
+
+return `<div class="card"><strong>${safe(s)}</strong><div class="number">${Math.round(w/games.length*100)}%</div><small>${w} wins · ${games.length} matches</small></div>`;
+
+}).join('')||'<div class="card">Play a match to build your statistics.</div>';
+
+}
+
+$('matchForm').addEventListener('submit',e=>{
+
+e.preventDefault();
+
+let a=$('myScore').value,b=$('theirScore').value;
+
+if((a==='')!==(b==='')){
+
+alert('Enter both scores or leave both blank.');
+
+return;
+
+}
+
+let result=$('result').value;
+
+if(a!==''&&((result==='Won'&&+a<=+b)||(result==='Lost'&&+a>=+b)||(result==='Draw'&&+a!==+b))){
+
+alert('Please check your score and result.');
+
+return;
+
+}
+
+matches.unshift({
+
+id:Date.now().toString(),
+
+sport:$('sport').value,
+
+opponent:$('opponent').value.trim(),
+
+result,a,b,
+
+mode:$('mode').value,
+
+visibility:$('visibility').value,
+
+notes:$('notes').value,
+
+date:new Date().toLocaleDateString()
+
+});
+
+save();
+
+e.target.reset();
+
+show('feed');
+
+});
+
+function saveProfile(){
+
+name=$('username').value.trim();
+
+localStorage.setItem('rivalName',JSON.stringify(name));
+
+render();
+
+}
+
+function addGear(){
+
+let g=$('gearName').value.trim();
+
+if(!g)return;
+
+gear.push(g);
+
+localStorage.setItem('rivalGear',JSON.stringify(gear));
+
+$('gearName').value='';
+
+render();
+
+}
+
+async function shareMatch(id){
+
+let m=matches.find(x=>x.id===id);
+
+if(!m||m.visibility==='Private')return;
+
+let text=`RIVAL | ${m.sport}\n${name||'I'} ${m.result.toLowerCase()} vs ${m.opponent}${m.a!==''?' '+m.a+'–'+m.b:''}`;
+
+try{
+
+if(navigator.share)await navigator.share({title:'RIVAL',text});
+
+else if(navigator.clipboard){
+
+await navigator.clipboard.writeText(text);
+
+alert('Result copied!');
+
+}else alert(text);
+
+}catch(e){}
+
+}
+
+sports.forEach(s=>{
+
+let b=document.createElement('button');
+
+b.textContent=s;
+
+b.onclick=()=>openSport(s);
+
+$('sportButtons').appendChild(b);
+
+});
+
+function openSport(s){
+
+let games=matches.filter(m=>m.sport===s);
+
+let hub=$('sportHub');
+
+hub.innerHTML=`<h2>${safe(s)}</h2>
+
+<div class="card"><div class="tag">YOUR SPORT</div>
+
+<h2>${games.length} matches played</h2>
+
+<button id="sportPlay" class="primary">Record match</button></div>
+
+<div class="card"><h3>News & events</h3>
+
+<p class="muted">Live news integration coming soon.</p>
+
+<a style="color:#c5ff43" target="_blank" rel="noopener" href="https://news.google.com/search?q=${encodeURIComponent(s.slice(3)+' sport tournaments')}">Explore latest news ↗</a></div>
+
+<div class="card"><h3>Gear in action</h3><p class="muted">Ambassador equipment showcases coming soon.</p></div>
+
+${games.map(card).join('')}`;
+
+$('sportPlay').onclick=()=>{
+
+show('play');
+
+$('sport').value=s;
+
+};
+
+}
+
+show('feed');
+
+</script>
+
+</body>
+
+</html>
